@@ -18,7 +18,7 @@ def read_file_cargo(self, file_dvl, file_scan):
         list_r = df_filter["Груз"].tolist()
     except Exception as ex:
         logger.error('Ошибка при чтении файла c DVL {}\n{}'.format(file_dvl, ex))
-        QMessageBox.critical(self, 'Ошибка',  'Ошибка при чтении файла c DVL {}\n{}'.format(file_dvl, ex))
+        QMessageBox.critical(self, 'Ошибка',  'Ошибка при чтении файла c DLVA  {}\n{}'.format(file_dvl, ex))
         self.restart()
     for file in file_scan:
         try:

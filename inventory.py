@@ -17,10 +17,40 @@ def read_file(self, file_base, file_tsd, checkbox):
                 df_base.drop(colum, axis=1, inplace=True)
             except:
                 ...
+    except:
+        try:
+            df_base = pd.read_excel(file_stock, na_values=0).fillna(0)
+            df_base = df_base[(df_base['Физические \nзапасы'] != 0)]
+            for colum in excess_colum_list:
+                try:
+                    df_base.drop(colum, axis=1, inplace=True)
+                except:
+                    ...
+        except Exception as ex:
+            logger.error('Ошибка при чтении файла {}\n{}'.format(file_stock, ex))
+            QMessageBox.critical(self, 'Ошибка', f'Ошибка открытия файла 6,1\n{ex}')
+    print(df_base.keys())
+    try:
+        list_colum = ['Местоположение', 'Код \nноменклатуры', 'Описание товара',
+                      'Физические \nзапасы', 'Передано на доставку', 'Продано',
+                      'Зарезерви\nровано', 'Доступно']
+        for colum in list_colum:
+            if colum not in df_base.keys():
+                df_base.loc[:, colum] = 0
+        colum_dict = {'Описание товара': 'first',
+                      'Физические \nзапасы': sum,
+                      'Передано на доставку': sum,
+                      'Продано': sum,
+                      'Зарезерви\nровано': sum,
+                      'Доступно': sum,
+                      }
+        df_base = df_base.groupby(['Код \nноменклатуры', 'Местоположение'], as_index=False). \
+            agg(colum_dict)
+        write_exsel(self, 'слияние', df_base)
     except Exception as ex:
-        logger.error('Ошибка при чтении файла {}\n{}'.format(file_stock, ex))
-        QMessageBox.critical(self, 'Ошибка', f'Ошибка открытия файла 6,1\n{ex}')
+        QMessageBox.critical(self, 'Ошибка', f'Ошибка слияния строк\n{ex}')
         self.restart()
+
     df_tsd = pd.DataFrame()
     for file in file_check:
         try:
@@ -77,7 +107,7 @@ def read_file(self, file_base, file_tsd, checkbox):
         QMessageBox.critical(self, 'Ошибка', f'Ошибка сверки в общем файле\n{ex}')
         self.restart()
 
-    write_exsel(self, 'Результат', result_df)
+    write_exsel(self, 'Результат инвентаризации', result_df)
 
 
 def write_exsel(self, name, df):
