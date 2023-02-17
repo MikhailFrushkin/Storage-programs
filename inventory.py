@@ -1,3 +1,6 @@
+import os
+from sys import executable, argv
+
 import numpy as np
 import pandas as pd
 from PyQt5.QtWidgets import QMessageBox
@@ -29,7 +32,6 @@ def read_file(self, file_base, file_tsd, checkbox):
         except Exception as ex:
             logger.error('Ошибка при чтении файла {}\n{}'.format(file_stock, ex))
             QMessageBox.critical(self, 'Ошибка', f'Ошибка открытия файла 6,1\n{ex}')
-    print(df_base.keys())
     try:
         list_colum = ['Местоположение', 'Код \nноменклатуры', 'Описание товара',
                       'Физические \nзапасы', 'Передано на доставку', 'Продано',
@@ -46,7 +48,6 @@ def read_file(self, file_base, file_tsd, checkbox):
                       }
         df_base = df_base.groupby(['Код \nноменклатуры', 'Местоположение'], as_index=False). \
             agg(colum_dict)
-        write_exsel(self, 'слияние', df_base)
     except Exception as ex:
         QMessageBox.critical(self, 'Ошибка', f'Ошибка слияния строк\n{ex}')
         self.restart()
@@ -60,6 +61,7 @@ def read_file(self, file_base, file_tsd, checkbox):
             logger.error('Ошибка при чтении файла {}\n{}'.format(file, ex))
             QMessageBox.critical(self, 'Ошибка', f'Ошибка открытия файла просчета\n{ex}')
             self.restart()
+
     try:
         df_tsd.rename(columns={'Местоположение': 'Местоположение тсд'}, inplace=True)
     except Exception as ex:

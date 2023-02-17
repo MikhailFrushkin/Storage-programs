@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QMessageBox
 from loguru import logger
 
 
-def read_file_cargo(self, file_dvl, file_scan):
+def read_file_cargo(self, file_dvl, file_scan, type_doc):
     """Чтение файлов и выявление расхождений через пересечение множеств"""
     res = []
     try:
@@ -21,14 +21,24 @@ def read_file_cargo(self, file_dvl, file_scan):
         QMessageBox.critical(self, 'Ошибка',  'Ошибка при чтении файла c DLVA  {}\n{}'.format(file_dvl, ex))
         self.restart()
     for file in file_scan:
-        try:
-            with open('{}'.format(file), newline='') as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    res.append(*row)
-        except Exception as ex:
-            logger.error('Ошибка при чтении файла сканирования {}\n{}'.format(file, ex))
-            QMessageBox.critical(self, 'Ошибка', 'Ошибка при чтении файла сканирования {}\n{}'.format(file, ex))
+        if type_doc == 2:
+            try:
+                with open('{}'.format(file), newline='', encoding='utf-8') as csvfile:
+                    reader = csv.DictReader(csvfile)
+                    for row in reader:
+                        res.append(row["text"])
+            except Exception as ex:
+                logger.error('Ошибка при чтении файла сканирования {}\n{}'.format(file, ex))
+                QMessageBox.critical(self, 'Ошибка', 'Ошибка при чтении файла сканирования {}\n{}'.format(file, ex))
+        else:
+            try:
+                with open('{}'.format(file), newline='') as csvfile:
+                    reader = csv.reader(csvfile)
+                    for row in reader:
+                        res.append(*row)
+            except Exception as ex:
+                logger.error('Ошибка при чтении файла сканирования {}\n{}'.format(file, ex))
+                QMessageBox.critical(self, 'Ошибка', 'Ошибка при чтении файла сканирования {}\n{}'.format(file, ex))
 
     list_none = sorted(list(set(list_r).difference(set(res))))
     list_over = sorted(list(set(res).difference(set(list_r))))

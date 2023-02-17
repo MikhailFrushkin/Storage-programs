@@ -1,13 +1,12 @@
 import datetime
-import glob
 import os
-import random
 from pathlib import Path
 from sys import argv, executable
+
 import qdarktheme
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QAction, QGraphicsPixmapItem, QGraphicsScene
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QAction
 
 from cargo import read_file_cargo
 from inventory import read_file
@@ -50,7 +49,7 @@ class Ui_MainWindow(object):
         self.label_3.setTextFormat(QtCore.Qt.AutoText)
         self.label_3.setObjectName("label_3")
         self.pushButton = QtWidgets.QPushButton(self.tab)
-        self.pushButton.setGeometry(QtCore.QRect(10, 60, 111, 31))
+        self.pushButton.setGeometry(QtCore.QRect(10, 60, 120, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -96,7 +95,7 @@ class Ui_MainWindow(object):
         self.checkBox.setFont(font)
         self.checkBox.setObjectName("checkBox")
         self.pushButton_2 = QtWidgets.QPushButton(self.tab)
-        self.pushButton_2.setGeometry(QtCore.QRect(10, 150, 111, 31))
+        self.pushButton_2.setGeometry(QtCore.QRect(10, 150, 120, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -145,7 +144,7 @@ class Ui_MainWindow(object):
         self.label_4.setTextFormat(QtCore.Qt.AutoText)
         self.label_4.setObjectName("label_4")
         self.pushButton_5 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton_5.setGeometry(QtCore.QRect(10, 40, 111, 31))
+        self.pushButton_5.setGeometry(QtCore.QRect(10, 40, 120, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -168,7 +167,7 @@ class Ui_MainWindow(object):
         self.label_7.setTextFormat(QtCore.Qt.AutoText)
         self.label_7.setObjectName("label_7")
         self.pushButton_6 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton_6.setGeometry(QtCore.QRect(10, 140, 111, 31))
+        self.pushButton_6.setGeometry(QtCore.QRect(10, 140, 120, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -183,6 +182,20 @@ class Ui_MainWindow(object):
         self.label_8.setTextFormat(QtCore.Qt.AutoText)
         self.label_8.setObjectName("label_8")
 
+        self.checkBox_2 = QtWidgets.QCheckBox(self.tab_2)
+        self.checkBox_2.setGeometry(QtCore.QRect(10, 210, 451, 31))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(12)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setUnderline(False)
+        font.setWeight(50)
+        font.setStrikeOut(False)
+        self.checkBox_2.setFont(font)
+        self.checkBox_2.setObjectName("checkBox_2")
+
+        self.checkBox_2.raise_()
         self.pushButton_4.raise_()
         self.label_4.raise_()
         self.pushButton_5.raise_()
@@ -233,6 +246,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Сверка R, B"))
         self.menu.setTitle(_translate("MainWindow", "Help"))
         self.action.setText(_translate("MainWindow", "О программе"))
+        self.checkBox_2.setText(_translate("MainWindow", "Использовать файлы CSV программы Сканер Qr"))
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -327,9 +341,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             QMessageBox.critical(self, 'Не выбран файл(ы) сканирования', 'Не выбран файл(ы) сканирования')
         if file_dvl and file_scan:
             time_start = datetime.datetime.now()
-            read_file_cargo(self, file_dvl, file_scan)
-            print('Время сверки эрок: {} секунд(ы)'.format((datetime.datetime.now() - time_start).total_seconds()))
-            self.statusBar().showMessage('Готово')
+            try:
+                read_file_cargo(self, file_dvl, file_scan, self.checkBox_2.checkState())
+                print('Время сверки эрок: {} секунд(ы)'.format((datetime.datetime.now() - time_start).total_seconds()))
+                self.statusBar().showMessage('Готово')
+            except Exception as ex:
+                self.statusBar().showMessage('Ошибка')
+                self.restart()
             try:
                 os.startfile(f'{self.current_dir}/Результат сверки R, B.xlsx')
             except:
@@ -337,6 +355,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def restart(self):
         os.execl(executable, os.path.abspath(__file__), *argv)
+
 
 
 if __name__ == '__main__':
