@@ -5,11 +5,11 @@ from sys import argv, executable
 
 import qdarktheme
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QAction
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from cargo import read_file_cargo
 from inventory import read_file
+from statistic import read_file_tsd
 
 
 class Ui_MainWindow(object):
@@ -36,7 +36,7 @@ class Ui_MainWindow(object):
         self.pushButton_3.setFont(font)
         self.pushButton_3.setObjectName("pushButton_3")
         self.label_3 = QtWidgets.QLabel(self.tab)
-        self.label_3.setGeometry(QtCore.QRect(130, 60, 221, 31))
+        self.label_3.setGeometry(QtCore.QRect(140, 60, 221, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -49,7 +49,7 @@ class Ui_MainWindow(object):
         self.label_3.setTextFormat(QtCore.Qt.AutoText)
         self.label_3.setObjectName("label_3")
         self.pushButton = QtWidgets.QPushButton(self.tab)
-        self.pushButton.setGeometry(QtCore.QRect(10, 60, 120, 31))
+        self.pushButton.setGeometry(QtCore.QRect(10, 60, 121, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -70,7 +70,7 @@ class Ui_MainWindow(object):
         self.label.setTextFormat(QtCore.Qt.AutoText)
         self.label.setObjectName("label")
         self.label_5 = QtWidgets.QLabel(self.tab)
-        self.label_5.setGeometry(QtCore.QRect(130, 150, 221, 31))
+        self.label_5.setGeometry(QtCore.QRect(140, 150, 221, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -95,7 +95,7 @@ class Ui_MainWindow(object):
         self.checkBox.setFont(font)
         self.checkBox.setObjectName("checkBox")
         self.pushButton_2 = QtWidgets.QPushButton(self.tab)
-        self.pushButton_2.setGeometry(QtCore.QRect(10, 150, 120, 31))
+        self.pushButton_2.setGeometry(QtCore.QRect(10, 150, 121, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -114,15 +114,6 @@ class Ui_MainWindow(object):
         self.label_2.setFont(font)
         self.label_2.setTextFormat(QtCore.Qt.AutoText)
         self.label_2.setObjectName("label_2")
-
-        self.pushButton_3.raise_()
-        self.label_3.raise_()
-        self.pushButton.raise_()
-        self.label.raise_()
-        self.label_5.raise_()
-        self.checkBox.raise_()
-        self.pushButton_2.raise_()
-        self.label_2.raise_()
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
@@ -144,7 +135,7 @@ class Ui_MainWindow(object):
         self.label_4.setTextFormat(QtCore.Qt.AutoText)
         self.label_4.setObjectName("label_4")
         self.pushButton_5 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton_5.setGeometry(QtCore.QRect(10, 40, 120, 31))
+        self.pushButton_5.setGeometry(QtCore.QRect(10, 40, 121, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -167,7 +158,7 @@ class Ui_MainWindow(object):
         self.label_7.setTextFormat(QtCore.Qt.AutoText)
         self.label_7.setObjectName("label_7")
         self.pushButton_6 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton_6.setGeometry(QtCore.QRect(10, 140, 120, 31))
+        self.pushButton_6.setGeometry(QtCore.QRect(10, 140, 121, 31))
         font = QtGui.QFont()
         font.setFamily("Times New Roman")
         font.setPointSize(10)
@@ -181,7 +172,6 @@ class Ui_MainWindow(object):
         self.label_8.setFont(font)
         self.label_8.setTextFormat(QtCore.Qt.AutoText)
         self.label_8.setObjectName("label_8")
-
         self.checkBox_2 = QtWidgets.QCheckBox(self.tab_2)
         self.checkBox_2.setGeometry(QtCore.QRect(10, 210, 451, 31))
         font = QtGui.QFont()
@@ -194,16 +184,42 @@ class Ui_MainWindow(object):
         font.setStrikeOut(False)
         self.checkBox_2.setFont(font)
         self.checkBox_2.setObjectName("checkBox_2")
-
-        self.checkBox_2.raise_()
-        self.pushButton_4.raise_()
-        self.label_4.raise_()
-        self.pushButton_5.raise_()
-        self.label_6.raise_()
-        self.label_7.raise_()
-        self.pushButton_6.raise_()
-        self.label_8.raise_()
         self.tabWidget.addTab(self.tab_2, "")
+        self.tab_3 = QtWidgets.QWidget()
+        self.tab_3.setObjectName("tab_3")
+        self.pushButton_7 = QtWidgets.QPushButton(self.tab_3)
+        self.pushButton_7.setGeometry(QtCore.QRect(160, 250, 151, 51))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(14)
+        font.setBold(False)
+        font.setWeight(50)
+        self.pushButton_7.setFont(font)
+        self.pushButton_7.setObjectName("pushButton_7")
+        self.label_9 = QtWidgets.QLabel(self.tab_3)
+        self.label_9.setGeometry(QtCore.QRect(10, 10, 301, 31))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(12)
+        self.label_9.setFont(font)
+        self.label_9.setTextFormat(QtCore.Qt.AutoText)
+        self.label_9.setObjectName("label_9")
+        self.pushButton_8 = QtWidgets.QPushButton(self.tab_3)
+        self.pushButton_8.setGeometry(QtCore.QRect(10, 50, 121, 31))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        self.pushButton_8.setFont(font)
+        self.pushButton_8.setObjectName("pushButton_8")
+        self.label_10 = QtWidgets.QLabel(self.tab_3)
+        self.label_10.setGeometry(QtCore.QRect(10, 90, 341, 31))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(10)
+        self.label_10.setFont(font)
+        self.label_10.setTextFormat(QtCore.Qt.AutoText)
+        self.label_10.setObjectName("label_10")
+        self.tabWidget.addTab(self.tab_3, "")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -220,7 +236,7 @@ class Ui_MainWindow(object):
         self.menuBar.addAction(self.menu.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -239,22 +255,24 @@ class Ui_MainWindow(object):
         self.pushButton_4.setText(_translate("MainWindow", "Выполнить"))
         self.label_4.setText(_translate("MainWindow", "Файл не выбран"))
         self.pushButton_5.setText(_translate("MainWindow", "Выбрать файл"))
-        self.label_6.setText(_translate("MainWindow", "Выберите файл DLVA"))
+        self.label_6.setText(_translate("MainWindow", "Выберите файл DVL"))
         self.label_7.setText(_translate("MainWindow", "Файл не выбран"))
         self.pushButton_6.setText(_translate("MainWindow", "Выбрать файл(ы)"))
         self.label_8.setText(_translate("MainWindow", "Выберите файл(ы) сканирования R, B с грузомест"))
+        self.checkBox_2.setText(_translate("MainWindow", "Использовать файлы CSV программы Сканер Qr"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Сверка R, B"))
+        self.pushButton_7.setText(_translate("MainWindow", "Выполнить"))
+        self.label_9.setText(_translate("MainWindow", "Выберите файл Отслеживаний заданий тсд"))
+        self.pushButton_8.setText(_translate("MainWindow", "Выбрать файл"))
+        self.label_10.setText(_translate("MainWindow", "Файл не выбран"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Статистика ТСД"))
         self.menu.setTitle(_translate("MainWindow", "Help"))
         self.action.setText(_translate("MainWindow", "О программе"))
-        self.checkBox_2.setText(_translate("MainWindow", "Использовать файлы CSV программы Сканер Qr"))
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        self.action = QAction(QIcon("images/icons/info.ico"), '&Info', self)
-        self.action.setShortcut('Ctrl+I')
-        self.action.setStatusTip('Info application')
         self.current_dir = Path.cwd()
         self.setupUi(self)
 
@@ -266,17 +284,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_6.clicked.connect(self.evt_btn_open_file_clicked4)
         self.pushButton_4.clicked.connect(self.evt_btn_clicked_cargo)
 
-        self.action.triggered.connect(self.about)
+        self.pushButton_8.clicked.connect(self.evt_btn_open_file_clicked5)
+        self.pushButton_7.clicked.connect(self.evt_btn_clicked_statistic)
 
-        self.label.setStyleSheet("color: rgb(255, 255, 255)")
-        self.label_2.setStyleSheet("color: rgb(255, 255, 255)")
-        self.label_3.setStyleSheet("color: rgb(255, 255, 255)")
-        self.label_4.setStyleSheet("color: rgb(255, 255, 255)")
-        self.label_5.setStyleSheet("color: rgb(255, 255, 255)")
-        self.label_6.setStyleSheet("color: rgb(255, 255, 255)")
-        self.label_7.setStyleSheet("color: rgb(255, 255, 255)")
-        self.label_8.setStyleSheet("color: rgb(255, 255, 255)")
-        self.checkBox.setStyleSheet("color: rgb(255, 255, 255)")
+        self.action.triggered.connect(self.about)
 
     def about(self):
         QMessageBox.information(self, 'О программе', 'Версия 1.0 '
@@ -302,6 +313,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         res = QFileDialog.getOpenFileNames(self, 'Открыть файл(ы)', f'{self.current_dir}', "CSV Files (*.csv)")
         if len(res[0]) > 0:
             self.label_7.setText('\n'.join(res[0]))
+
+    def evt_btn_open_file_clicked5(self):
+        res = QFileDialog.getOpenFileName(self, 'Открыть файл', f'{self.current_dir}', 'Лист XLSX (*.xlsx)')
+        if res[0] != '':
+            self.label_10.setText(res[0])
 
     def evt_btn_clicked(self):
         file_base = None
@@ -353,9 +369,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             except:
                 ...
 
+    def evt_btn_clicked_statistic(self):
+        file_statistic = None
+
+        if self.label_10.text() != 'Файл не выбран':
+            file_statistic = self.label_10.text()
+        else:
+            QMessageBox.critical(self, 'Не выбран файл Отслеживаний заданий тсд',
+                                 'Не выбран файл Отслеживаний заданий тсд ')
+
+        if file_statistic:
+            time_start = datetime.datetime.now()
+            try:
+                read_file_tsd(self, file_statistic)
+                print('Время формирования статистики: {} секунд(ы)'.format(
+                    (datetime.datetime.now() - time_start).total_seconds()))
+                self.statusBar().showMessage('Готово')
+            except Exception as ex:
+                self.statusBar().showMessage('Ошибка')
+                self.restart()
+            try:
+                os.startfile(f'{self.current_dir}/Статистика.xlsx')
+            except:
+                ...
+
     def restart(self):
         os.execl(executable, os.path.abspath(__file__), *argv)
-
 
 
 if __name__ == '__main__':
