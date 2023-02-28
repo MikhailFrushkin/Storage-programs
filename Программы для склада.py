@@ -1,5 +1,6 @@
 import datetime
 import os
+import subprocess
 from pathlib import Path
 from sys import argv, executable
 
@@ -339,7 +340,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 (datetime.datetime.now() - time_start).total_seconds()))
             self.statusBar().showMessage('Готово')
             try:
-                os.startfile(f'{self.current_dir}/Результат инвентаризации.xlsx')
+                open_file(f'{self.current_dir}/Результат инвентаризации.xlsx')
             except:
                 ...
 
@@ -365,7 +366,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.statusBar().showMessage('Ошибка')
                 self.restart()
             try:
-                os.startfile(f'{self.current_dir}/Результат сверки R, B.xlsx')
+                open_file(f'{self.current_dir}/Результат сверки R, B.xlsx')
             except:
                 ...
 
@@ -389,12 +390,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.statusBar().showMessage('Ошибка')
                 self.restart()
             try:
-                os.startfile(f'{self.current_dir}/Статистика.xlsx')
+                open_file(f'{self.current_dir}/Статистика.xlsx')
             except:
                 ...
 
     def restart(self):
         os.execl(executable, os.path.abspath(__file__), *argv)
+
+
+def open_file(filename):
+    if sys.platform == "win32":
+        os.startfile(filename)
+    else:
+        opener = "open" if sys.platform == "darwin" else "xdg-open"
+        subprocess.call([opener, filename])
 
 
 if __name__ == '__main__':
