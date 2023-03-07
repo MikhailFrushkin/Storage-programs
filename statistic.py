@@ -21,6 +21,7 @@ def user_oper(self, df):
         result[user]['Пст в зал'] = 0
         result[user]['Перенос'] = 0
         result[user]['Пст в шт.'] = 0
+        df = df[~(df['Тип документа'].isnull())]
         new_df = df[(df['Исполнитель'] == user) & (df['Тип документа'].
                                                    isin(operations_in_doc))]['Тип документа'].value_counts()
         if new_df.count() != 0:

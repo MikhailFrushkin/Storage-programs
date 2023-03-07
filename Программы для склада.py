@@ -256,7 +256,7 @@ class Ui_MainWindow(object):
         self.pushButton_4.setText(_translate("MainWindow", "Выполнить"))
         self.label_4.setText(_translate("MainWindow", "Файл не выбран"))
         self.pushButton_5.setText(_translate("MainWindow", "Выбрать файл"))
-        self.label_6.setText(_translate("MainWindow", "Выберите файл DVL"))
+        self.label_6.setText(_translate("MainWindow", "Выберите файл DLVA"))
         self.label_7.setText(_translate("MainWindow", "Файл не выбран"))
         self.pushButton_6.setText(_translate("MainWindow", "Выбрать файл(ы)"))
         self.label_8.setText(_translate("MainWindow", "Выберите файл(ы) сканирования R, B с грузомест"))
@@ -351,7 +351,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.label_4.text() != 'Файл не выбран':
             file_dvl = self.label_4.text()
         else:
-            QMessageBox.critical(self, 'Не выбран файл DVL', 'Не выбран файл DLVA ')
+            QMessageBox.critical(self, 'Не выбран файл DLVA', 'Не выбран файл DLVA ')
         if self.label_7.text() != 'Файл не выбран':
             file_scan = self.label_7.text().split('\n')
         else:
@@ -359,6 +359,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if file_dvl and file_scan:
             time_start = datetime.datetime.now()
             try:
+                print(file_dvl, file_scan, self.checkBox_2.checkState())
                 read_file_cargo(self, file_dvl, file_scan, self.checkBox_2.checkState())
                 print('Время сверки эрок: {} секунд(ы)'.format((datetime.datetime.now() - time_start).total_seconds()))
                 self.statusBar().showMessage('Готово')
