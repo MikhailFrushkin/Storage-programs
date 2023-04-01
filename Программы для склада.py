@@ -8,7 +8,7 @@ import qdarktheme
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
-from cargo import read_file_cargo
+from cargo2 import read_file_cargo
 from inventory import read_file
 from statistic import read_file_tsd
 

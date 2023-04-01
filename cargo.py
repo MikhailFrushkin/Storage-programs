@@ -57,7 +57,7 @@ def read_file_cargo(self, file_dvl, file_scan, type_doc):
     sorted_dict = dict(sorted(none_dict.items(), key=lambda item: item[1]))
 
     try:
-        len_dlv = len(df)
+        len_dlv = len(df_filter)
         len_scan = len(res)
         write_exsel(len_dlv, len_scan, sorted_dict, list_over, list_bu)
     except Exception as ex:
