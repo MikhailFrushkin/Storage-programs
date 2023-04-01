@@ -73,13 +73,17 @@ def read_file_cargo(self, file_dvl, file_scan, type_doc):
             check_values = df[df['Код товара'].isna()]
             check_values = list(check_values['barcode'].unique())
 
-            df.to_excel(writer, sheet_name='Лишние R', index=False)
+            df.to_excel(writer, sheet_name='Лишние R', index=False, startrow=2)
             workbook = writer.book
             worksheet = writer.sheets['Лишние R']
             red_format = writer.book.add_format({'bg_color': '#FFC7CE'})
+            worksheet.merge_range('A1:J1',
+                                  'Красной заливкой выделены отсканированные Эрки которых нет в документе, '
+                                  'для удобства поиска показаны 2 места отсканированных перед ней и после, '
+                                  'если таковые были')
             for idx, row in df.iterrows():
                 if row['barcode'] in check_values:
-                    worksheet.set_row(idx + 1, cell_format=red_format)
+                    worksheet.set_row(idx + 3, cell_format=red_format)
             column_max_lengths = []
             for i, column in enumerate(df.columns):
                 column_length = max(df[column].astype(str).map(len).max(), len(column)) + 2
