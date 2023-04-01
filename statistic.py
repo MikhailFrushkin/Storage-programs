@@ -85,7 +85,9 @@ def read_file_tsd(self, file_statistic):
     global date_finish
     global date_list_day
     try:
-        df = pd.read_excel(file_statistic)
+        df = pd.read_excel(file_statistic, na_values='')
+        df.fillna(0, inplace=True)
+
         users = sorted(list(df['Исполнитель'].unique()))
         df = df[df['Статус'] == 'Завершено']
         df['Время сборки'] = pd.to_timedelta(df["Время завершения"] - df["Время создания"]).astype(str)

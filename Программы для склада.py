@@ -291,8 +291,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.action.triggered.connect(self.about)
 
     def about(self):
-        QMessageBox.information(self, 'О программе', 'Версия 1.0 '
-                                                     'от 16.02.2023\n'
+        QMessageBox.information(self, 'О программе', 'Версия 1.1 '
+                                                     'от 1.04.2023\n'
                                                      'Разработал Фрышкин Михаил Александрович')
 
     def evt_btn_open_file_clicked(self):
