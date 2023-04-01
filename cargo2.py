@@ -39,7 +39,6 @@ def read_file_cargo(self, file_dvl, file_scan, type_doc):
     df_scan = pd.DataFrame(res, columns=['barcode'])
 
     merged_df = pd.merge(df_scan, df_ds_result, left_on=['barcode'], right_on=['Груз'], how='outer')
-    merged_df.to_excel('text.xlsx', index=False)
 
     df_none = merged_df[merged_df['barcode'].isnull()]
     df_none = df_none.drop(columns=['barcode'])

@@ -1,3 +1,4 @@
+import datetime
 import random
 
 import pandas as pd
@@ -90,23 +91,44 @@ def read_file_tsd(self, file_statistic):
 
         users = sorted(list(df['Исполнитель'].unique()))
         df = df[df['Статус'] == 'Завершено']
-        df['Время сборки'] = pd.to_timedelta(df["Время завершения"] - df["Время создания"]).astype(str)
 
         date_list = sorted(df['Время завершения'].to_list())
         date_start = date_list[0].date()
         date_finish = date_list[-1].date()
         date_list_day = sorted(set([i.date() for i in date_list]))
+        df['Время сборки в рабочих часах'] = df.apply(
+            lambda x: calculate_work_hours(self, pd.to_datetime(x['Время создания']),
+                                           pd.to_datetime(x['Время завершения'])), axis=1)
 
         df_dost = df[df['Название документа'].str.contains('Подбор Доставка', na=False, regex=True)]
         df_dost_s = df[df['Название документа'].str.contains('Подбор Самовывоз', na=False, regex=True)]
+
     except Exception as ex:
-        logger.error('Ошибка при чтении файла c 6.1 {}\n{}'.format(file_statistic, ex))
+        logger.error('Ошибка при чтении файла отслеживания заданий тсд {}\n{}'.format(file_statistic, ex))
         QMessageBox.critical(self, 'Ошибка',
-                             'Ошибка при чтении файла c 6.1 {}\n{}'.format(file_statistic, ex))
+                             'Ошибка при чтении файла отслеживания заданий тсд {}\n{}'.format(file_statistic, ex))
         self.restart()
 
     result_df = user_oper(self, df)
     write_exsel(self, df=result_df, df_dost=df_dost, df_dost_s=df_dost_s, df_input=df)
+
+
+def calculate_work_hours(self, start, end):
+    # Создаем список дат-временных значений между началом и концом задачи
+    minutes = pd.date_range(start=start, end=end, freq='T')
+
+    # Оставляем только рабочие часы (между 9:00 и 21:00)
+    work_minutes = minutes[(minutes.hour >= self.spinBox.value()) & (minutes.hour < self.spinBox_2.value())]
+
+    # Фильтруем только те минуты, которые находятся между началом и концом задачи
+    task_minutes = work_minutes[(work_minutes >= start) & (work_minutes <= end)]
+
+    # Вычисляем общее время в часах, минутах и секундах
+    total_seconds = len(task_minutes) * 60
+    total_minutes, remaining_seconds = divmod(total_seconds, 60)
+    total_hours, remaining_minutes = divmod(total_minutes, 60)
+
+    return f'{total_hours:02d}:{remaining_minutes:02d}:{remaining_seconds:02d}'
 
 
 def total_df_create(self, df, date_s, date_f):
@@ -247,33 +269,63 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_input=None):
                 self.restart()
 
             try:
-                df_dost.style.set_properties(
-                    **{
-                        "text-align": "left",
-                        "font-size": "14px",
-                        "border": "1px solid black"
-                    }).to_excel(writer, sheet_name='Подбор доставка', index=False, na_rep='')
+                df_dost = df_dost.reset_index()
+                df_dost['Время создания'] = df_dost['Время создания'].astype('string')
+                df_dost['Время завершения'] = df_dost['Время завершения'].astype('string')
+                df_dost = df_dost.drop(columns=['index'])
+                df_dost.to_excel(writer, sheet_name='Подбор доставка', index=False, na_rep='')
                 worksheet2 = writer.sheets['Подбор доставка']
                 (max_row, max_col) = df_dost.shape
                 worksheet2.autofilter(0, 0, max_row, max_col - 1)
-                worksheet2.autofit()
+                red_format = writer.book.add_format({'bg_color': '#FFC7CE'})
+                worksheet2 = writer.sheets['Подбор доставка']
+                (max_row, max_col) = df_dost.shape
+                worksheet2.autofilter(0, 0, max_row, max_col - 1)
+                for idx, row in df_dost.iterrows():
+                    time_obj = datetime.datetime.strptime(row['Время сборки в рабочих часах'], '%H:%M:%S')
+                    delta_obj = datetime.timedelta(hours=time_obj.hour, minutes=time_obj.minute,
+                                                   seconds=time_obj.second)
+                    seconds = delta_obj.total_seconds()
+                    if seconds > 3600:
+                        for col_num, value in enumerate(row):
+                            if col_num in [0, 1, 2, 3, 4, 5, 6]:
+                                worksheet2.write(idx + 1, col_num, value, red_format)
+                column_max_lengths = []
+                for i, column in enumerate(df_dost.columns):
+                    column_length = max(df_dost[column].astype(str).map(len).max(), len(column)) + 2
+                    column_max_lengths.append(column_length)
+                    worksheet2.set_column(i, i, column_length)
             except Exception as ex:
                 logger.error(ex)
 
             try:
-                df_dost_s.style.set_properties(
-                    **{
-                        "text-align": "left",
-                        "font-size": "14px",
-                        "border": "1px solid black"
-                    }). \
-                    to_excel(writer, sheet_name='Подбор самовывоз', index=False, na_rep='')
+                red_format = writer.book.add_format({'bg_color': '#FFC7CE'})
+                df_dost_s = df_dost_s.reset_index()
+                df_dost_s['Время создания'] = df_dost_s['Время создания'].astype('string')
+                df_dost_s['Время завершения'] = df_dost_s['Время завершения'].astype('string')
+                df_dost_s = df_dost_s.drop(columns=['index'])
+
+                df_dost_s.to_excel(writer, sheet_name='Подбор самовывоз', index=False, na_rep='')
                 worksheet3 = writer.sheets['Подбор самовывоз']
                 (max_row, max_col) = df_dost_s.shape
                 worksheet3.autofilter(0, 0, max_row, max_col - 1)
-                worksheet3.autofit()
+                for idx, row in df_dost_s.iterrows():
+                    time_obj = datetime.datetime.strptime(row['Время сборки в рабочих часах'], '%H:%M:%S')
+                    delta_obj = datetime.timedelta(hours=time_obj.hour, minutes=time_obj.minute,
+                                                   seconds=time_obj.second)
+                    seconds = delta_obj.total_seconds()
+                    if seconds > 1800:
+                        for col_num, value in enumerate(row):
+                            if col_num in [0, 1, 2, 3, 4, 5, 6]:
+                                worksheet3.write(idx + 1, col_num, value, red_format)
+                column_max_lengths = []
+                for i, column in enumerate(df_dost_s.columns):
+                    column_length = max(df_dost_s[column].astype(str).map(len).max(), len(column)) + 2
+                    column_max_lengths.append(column_length)
+                    worksheet3.set_column(i, i, column_length)
             except Exception as ex:
                 logger.error(ex)
+
             df_input["Время завершения"] = pd.to_datetime(df_input["Время завершения"]).dt.date
             for day in date_list_day:
                 try:
@@ -303,5 +355,3 @@ def set_column(df, worksheet, cell_format=None, num=0):
     worksheet.autofilter(num, 0, max_row, max_col - 1)
     worksheet.set_column('A:A', 24, cell_format)
     worksheet.set_column('B:K', 16, cell_format)
-
-
