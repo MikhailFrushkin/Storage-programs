@@ -15,6 +15,7 @@ def read_file(self, file_base, file_tsd, checkbox):
     try:
         df_base = pd.read_excel(file_stock, skiprows=14, na_values=0).fillna(0)
         df_base = df_base[(df_base['Физические \nзапасы'] != 0)]
+        df_base['Местоположение'] = df_base['Местоположение'].astype('string').str.lower()
         for colum in excess_colum_list:
             try:
                 df_base.drop(colum, axis=1, inplace=True)
@@ -48,6 +49,7 @@ def read_file(self, file_base, file_tsd, checkbox):
                       }
         df_base = df_base.groupby(['Код \nноменклатуры', 'Местоположение'], as_index=False). \
             agg(colum_dict)
+        print(df_base)
     except Exception as ex:
         QMessageBox.critical(self, 'Ошибка', f'Ошибка слияния строк\n{ex}')
         self.restart()
@@ -56,7 +58,13 @@ def read_file(self, file_base, file_tsd, checkbox):
     for file in file_check:
         try:
             df_temp = pd.read_excel(file, usecols=['Код номенклатуры', 'Местоположение', 'Количество факт'])
+            df_temp['Местоположение'] = df_temp['Местоположение'].astype('string').str.lower()
             df_tsd = pd.concat([df_tsd, df_temp], ignore_index=True)
+            # df_tsd = df_tsd.astype({'Код номенклатуры': 'int32', 'Количество факт': 'int32'})
+            # print(df_tsd)
+            df_tsd['Код номенклатуры'] = df_tsd['Код номенклатуры'].astype(np.int64)
+            df_tsd['Количество факт'] = df_tsd['Количество факт'].astype(np.int64)
+
         except Exception as ex:
             logger.error('Ошибка при чтении файла {}\n{}'.format(file, ex))
             QMessageBox.critical(self, 'Ошибка', f'Ошибка открытия файла просчета\n{ex}')
