@@ -87,11 +87,28 @@ def read_file_tsd(self, file_statistic):
     global date_list_day
     try:
         df = pd.read_excel(file_statistic, na_values='')
-        df.fillna(0, inplace=True)
-
-        users = sorted(list(df['Исполнитель'].unique()))
         df = df[df['Статус'] == 'Завершено']
-
+        df = df[~(df['Тип документа'].isnull())
+                & ~(df['Время создания'].isnull())
+                & ~(df['Исполнитель'].isnull())
+                & ~(df['Время завершения'].isnull())]
+        list_drop = ['ИД документа',
+                     'Статус',
+                     'Кем создано',
+                     'Устройство',
+                     'Зона выдачи заказа',
+                     'Код поставщика',
+                     'Название поставщика',
+                     'ОМТ',
+                     'Перенесено в ЖП',
+                     ]
+        for i in list_drop:
+            try:
+                df = df.drop(columns=i)
+            except Exception as ex:
+                logger.debug(f'нет данного поля в документе {i} {ex}')
+        df.fillna(0, inplace=True)
+        users = sorted(list(df['Исполнитель'].unique()))
         date_list = sorted(df['Время завершения'].to_list())
         date_start = date_list[0].date()
         date_finish = date_list[-1].date()
@@ -274,6 +291,7 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_input=None):
                 df_dost['Время завершения'] = df_dost['Время завершения'].astype('string')
                 df_dost = df_dost.drop(columns=['index'])
                 df_dost.to_excel(writer, sheet_name='Подбор доставка', index=False, na_rep='')
+
                 worksheet2 = writer.sheets['Подбор доставка']
                 (max_row, max_col) = df_dost.shape
                 worksheet2.autofilter(0, 0, max_row, max_col - 1)
@@ -295,6 +313,13 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_input=None):
                     column_length = max(df_dost[column].astype(str).map(len).max(), len(column)) + 2
                     column_max_lengths.append(column_length)
                     worksheet2.set_column(i, i, column_length)
+
+                df_dost['Время сборки в рабочих часах'] = pd.to_timedelta(df_dost['Время сборки в рабочих часах'])
+                total_time = df_dost['Время сборки в рабочих часах'].sum()
+                line_dost = '{:02d}:{:02d}:{:02d}'.format(int(total_time.total_seconds() // 3600),
+                                                          int(total_time.total_seconds() % 3600 // 60),
+                                                          int(total_time.total_seconds() % 60),
+                                                          )
             except Exception as ex:
                 logger.error(ex)
 
@@ -323,9 +348,16 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_input=None):
                     column_length = max(df_dost_s[column].astype(str).map(len).max(), len(column)) + 2
                     column_max_lengths.append(column_length)
                     worksheet3.set_column(i, i, column_length)
+                df_dost_s['Время сборки в рабочих часах'] = pd.to_timedelta(df_dost_s['Время сборки в рабочих часах'])
+                total_time = df_dost_s['Время сборки в рабочих часах'].sum()
+                line_dost_s = '{:02d}:{:02d}:{:02d}'.format(int(total_time.total_seconds() // 3600),
+                                                            int(total_time.total_seconds() % 3600 // 60),
+                                                            int(total_time.total_seconds() % 60),
+                                                            )
             except Exception as ex:
                 logger.error(ex)
-
+            print(line_dost)
+            print(line_dost_s)
             df_input["Время завершения"] = pd.to_datetime(df_input["Время завершения"]).dt.date
             for day in date_list_day:
                 try:
@@ -342,7 +374,9 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_input=None):
                     set_column(df_table[0], worksheet, cell_format=cell_format, num=3)
                 except Exception as ex:
                     logger.error('{} {}'.format(ex, day))
-
+            QMessageBox.information(self, 'Сводка',
+                                    'Время сбора подбор самовывоз: {}\n'
+                                    'Время сбора подбор доставка: {}\n'.format(line_dost_s, line_dost))
     except Exception as ex:
         logger.error('Ошибка записи результата {}'.format(ex))
         QMessageBox.critical(self, 'Ошибка',
