@@ -116,9 +116,11 @@ def read_file_tsd(self, file_statistic):
         df['Время сборки в рабочих часах'] = df.apply(
             lambda x: calculate_work_hours(self, pd.to_datetime(x['Время создания']),
                                            pd.to_datetime(x['Время завершения'])), axis=1)
+        df.to_excel('ewaew.xlsx')
 
         df_dost = df[df['Название документа'].str.contains('Подбор Доставка', na=False, regex=True)]
         df_dost_s = df[df['Название документа'].str.contains('Подбор Самовывоз', na=False, regex=True)]
+        df_dost_dost = df[df['Тип документа'] == 'Доставка']
 
     except Exception as ex:
         logger.error('Ошибка при чтении файла отслеживания заданий тсд {}\n{}'.format(file_statistic, ex))
@@ -127,7 +129,7 @@ def read_file_tsd(self, file_statistic):
         self.restart()
 
     result_df = user_oper(self, df)
-    write_exsel(self, df=result_df, df_dost=df_dost, df_dost_s=df_dost_s, df_input=df)
+    write_exsel(self, df=result_df, df_dost=df_dost, df_dost_s=df_dost_s, df_dost_dost=df_dost_dost, df_input=df)
 
 
 def calculate_work_hours(self, start, end):
@@ -221,7 +223,7 @@ def table_df_create(self, df):
     return df_sort, df_colors
 
 
-def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_input=None):
+def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_dost_dost=None, df_input=None):
     try:
         with pd.ExcelWriter('Статистика.xlsx', engine='xlsxwriter', datetime_format='DD/MM/YY HH:MM:SS') as writer:
             (max_row, max_col) = df.shape
@@ -236,7 +238,6 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_input=None):
 
             worksheet = writer.sheets['Таблица']
             set_column(df_table[0], worksheet, cell_format=cell_format, num=3)
-
             try:
                 chart = workbook.add_chart({'type': 'doughnut'})
 
@@ -356,8 +357,21 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_input=None):
                                                             )
             except Exception as ex:
                 logger.error(ex)
+
+            try:
+                print(df_dost_dost)
+                df_dost_dost['Время сборки в рабочих часах'] = pd.to_timedelta(df_dost_dost['Время сборки в рабочих часах'])
+                total_time = df_dost_dost['Время сборки в рабочих часах'].sum()
+                line_dost_dost = '{:02d}:{:02d}:{:02d}'.format(int(total_time.total_seconds() // 3600),
+                                                            int(total_time.total_seconds() % 3600 // 60),
+                                                            int(total_time.total_seconds() % 60),
+                                                            )
+            except Exception as ex:
+                logger.error(ex)
             print(line_dost)
             print(line_dost_s)
+            print(line_dost_dost)
+
             df_input["Время завершения"] = pd.to_datetime(df_input["Время завершения"]).dt.date
             for day in date_list_day:
                 try:
@@ -376,7 +390,9 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_input=None):
                     logger.error('{} {}'.format(ex, day))
             QMessageBox.information(self, 'Сводка',
                                     'Время сбора подбор самовывоз: {}\n'
-                                    'Время сбора подбор доставка: {}\n'.format(line_dost_s, line_dost))
+                                    'Время сбора подбор доставка: {}\n'
+                                    'Время сбора маршрутов на доставку: {}\n'
+                                    .format(line_dost_s, line_dost, line_dost_dost))
     except Exception as ex:
         logger.error('Ошибка записи результата {}'.format(ex))
         QMessageBox.critical(self, 'Ошибка',
