@@ -128,7 +128,7 @@ def read_file_tsd(self, file_statistic):
         self.restart()
 
     result_df = user_oper(self, df)
-    write_exsel(self, df=result_df, df_dost=df_dost, df_dost_s=df_dost_s, df_dost_dost=df_dost_dost, df_input=df)
+    write_exсel(self, df=result_df, df_dost=df_dost, df_dost_s=df_dost_s, df_dost_dost=df_dost_dost, df_input=df)
 
 
 def calculate_work_hours(self, start, end):
@@ -192,7 +192,7 @@ def total_df_create(self, df, date_s, date_f):
     return df_total
 
 
-def table_df_create(self, df):
+def table_df_create(df):
     df_sort = df.sort_values(by='Всего', ascending=False)
     df_colors = df_sort.style.background_gradient(axis=0,
                                                   subset=['Отгрузка', 'Подбор',
@@ -222,7 +222,7 @@ def table_df_create(self, df):
     return df_sort, df_colors
 
 
-def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_dost_dost=None, df_input=None):
+def write_exсel(self, df=None, df_dost=None, df_dost_s=None, df_dost_dost=None, df_input=None):
     try:
         with pd.ExcelWriter('Статистика.xlsx', engine='xlsxwriter', datetime_format='DD/MM/YY HH:MM:SS') as writer:
             (max_row, max_col) = df.shape
@@ -232,7 +232,7 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_dost_dost=None, 
             df_total = total_df_create(self, df, date_s=date_start, date_f=date_finish)
             df_total.to_excel(writer, sheet_name='Таблица', header=True, index=False, na_rep='')
 
-            df_table = table_df_create(self, df)
+            df_table = table_df_create(df)
             df_table[1].to_excel(writer, sheet_name='Таблица', index=False, na_rep='', startrow=3)
 
             worksheet = writer.sheets['Таблица']
@@ -313,13 +313,6 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_dost_dost=None, 
                     column_length = max(df_dost[column].astype(str).map(len).max(), len(column)) + 2
                     column_max_lengths.append(column_length)
                     worksheet2.set_column(i, i, column_length)
-
-                df_dost['Время сборки в рабочих часах'] = pd.to_timedelta(df_dost['Время сборки в рабочих часах'])
-                total_time = df_dost['Время сборки в рабочих часах'].sum()
-                line_dost = '{:02d}:{:02d}:{:02d}'.format(int(total_time.total_seconds() // 3600),
-                                                          int(total_time.total_seconds() % 3600 // 60),
-                                                          int(total_time.total_seconds() % 60),
-                                                          )
             except Exception as ex:
                 logger.error(ex)
 
@@ -348,23 +341,7 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_dost_dost=None, 
                     column_length = max(df_dost_s[column].astype(str).map(len).max(), len(column)) + 2
                     column_max_lengths.append(column_length)
                     worksheet3.set_column(i, i, column_length)
-                df_dost_s['Время сборки в рабочих часах'] = pd.to_timedelta(df_dost_s['Время сборки в рабочих часах'])
-                total_time = df_dost_s['Время сборки в рабочих часах'].sum()
-                line_dost_s = '{:02d}:{:02d}:{:02d}'.format(int(total_time.total_seconds() // 3600),
-                                                            int(total_time.total_seconds() % 3600 // 60),
-                                                            int(total_time.total_seconds() % 60),
-                                                            )
-            except Exception as ex:
-                logger.error(ex)
 
-            try:
-                print(df_dost_dost)
-                df_dost_dost['Время сборки в рабочих часах'] = pd.to_timedelta(df_dost_dost['Время сборки в рабочих часах'])
-                total_time = df_dost_dost['Время сборки в рабочих часах'].sum()
-                line_dost_dost = '{:02d}:{:02d}:{:02d}'.format(int(total_time.total_seconds() // 3600),
-                                                            int(total_time.total_seconds() % 3600 // 60),
-                                                            int(total_time.total_seconds() % 60),
-                                                            )
             except Exception as ex:
                 logger.error(ex)
 
@@ -377,23 +354,47 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_dost_dost=None, 
                     df_total = total_df_create(self, df_user_for_day, date_s=day, date_f=day)
                     df_total.to_excel(writer, sheet_name=f'{day}', header=True, index=False, na_rep='')
 
-                    df_table = table_df_create(self, df_user_for_day)
+                    df_table = table_df_create(df_user_for_day)
                     df_table[1].to_excel(writer, sheet_name=f'{day}', index=False, na_rep='', startrow=3)
 
                     worksheet = writer.sheets[f'{day}']
                     set_column(df_table[0], worksheet, cell_format=cell_format, num=3)
                 except Exception as ex:
                     logger.error('{} {}'.format(ex, day))
-            QMessageBox.information(self, 'Сводка',
-                                    'Время сбора подбор самовывоз: {}\n'
-                                    'Время сбора подбор доставка: {}\n'
-                                    'Время сбора маршрутов на доставку: {}\n'
-                                    .format(line_dost_s, line_dost, line_dost_dost))
+
+            try:
+                time_dost_dost = time_to_operations(df_dost_dost)
+                time_dost_s = time_to_operations(df_dost_s)
+                time_dost = time_to_operations(df_dost)
+
+                QMessageBox.information(self, 'Сводка',
+                                        'Время сбора подбор самовывоз: {}\n'
+                                        'Время сбора подбор доставка: {}\n'
+                                        'Время сбора маршрутов на доставку: {}\n'
+                                        .format(time_dost_s, time_dost, time_dost_dost))
+
+            except Exception as ex:
+                logger.error(ex)
+
     except Exception as ex:
         logger.error('Ошибка записи результата {}'.format(ex))
         QMessageBox.critical(self, 'Ошибка',
                              'Ошибка записи результата {}'.format(ex))
         self.restart()
+
+
+def time_to_operations(df):
+    result = '00:00:00'
+    try:
+        df['Время сборки в рабочих часах'] = pd.to_timedelta(df['Время сборки в рабочих часах'])
+        total_time = df['Время сборки в рабочих часах'].sum()
+        result = '{:02d}:{:02d}:{:02d}'.format(int(total_time.total_seconds() // 3600),
+                                               int(total_time.total_seconds() % 3600 // 60),
+                                               int(total_time.total_seconds() % 60),
+                                               )
+    except Exception as ex:
+        logger.error(ex)
+    return result
 
 
 def set_column(df, worksheet, cell_format=None, num=0):
