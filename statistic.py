@@ -116,7 +116,6 @@ def read_file_tsd(self, file_statistic):
         df['Время сборки в рабочих часах'] = df.apply(
             lambda x: calculate_work_hours(self, pd.to_datetime(x['Время создания']),
                                            pd.to_datetime(x['Время завершения'])), axis=1)
-        df.to_excel('ewaew.xlsx')
 
         df_dost = df[df['Название документа'].str.contains('Подбор Доставка', na=False, regex=True)]
         df_dost_s = df[df['Название документа'].str.contains('Подбор Самовывоз', na=False, regex=True)]
@@ -368,9 +367,6 @@ def write_exsel(self, df=None, df_dost=None, df_dost_s=None, df_dost_dost=None, 
                                                             )
             except Exception as ex:
                 logger.error(ex)
-            print(line_dost)
-            print(line_dost_s)
-            print(line_dost_dost)
 
             df_input["Время завершения"] = pd.to_datetime(df_input["Время завершения"]).dt.date
             for day in date_list_day:
