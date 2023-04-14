@@ -120,6 +120,7 @@ def read_file_tsd(self, file_statistic):
         df_dost = df[df['Название документа'].str.contains('Подбор Доставка', na=False, regex=True)]
         df_dost_s = df[df['Название документа'].str.contains('Подбор Самовывоз', na=False, regex=True)]
         df_dost_dost = df[df['Тип документа'] == 'Доставка']
+        show_graf(df)
 
     except Exception as ex:
         logger.error('Ошибка при чтении файла отслеживания заданий тсд {}\n{}'.format(file_statistic, ex))
@@ -356,25 +357,24 @@ def write_exсel(self, df=None, df_dost=None, df_dost_s=None, df_dost_dost=None,
 
                     df_table = table_df_create(df_user_for_day)
                     df_table[1].to_excel(writer, sheet_name=f'{day}', index=False, na_rep='', startrow=3)
-
                     worksheet = writer.sheets[f'{day}']
                     set_column(df_table[0], worksheet, cell_format=cell_format, num=3)
                 except Exception as ex:
                     logger.error('{} {}'.format(ex, day))
 
-            try:
-                time_dost_dost = time_to_operations(df_dost_dost)
-                time_dost_s = time_to_operations(df_dost_s)
-                time_dost = time_to_operations(df_dost)
-
-                QMessageBox.information(self, 'Сводка',
-                                        'Время сбора подбор самовывоз: {}\n'
-                                        'Время сбора подбор доставка: {}\n'
-                                        'Время сбора маршрутов на доставку: {}\n'
-                                        .format(time_dost_s, time_dost, time_dost_dost))
-
-            except Exception as ex:
-                logger.error(ex)
+            # try:
+            #     time_dost_dost = time_to_operations(df_dost_dost)
+            #     time_dost_s = time_to_operations(df_dost_s)
+            #     time_dost = time_to_operations(df_dost)
+            #
+            #     QMessageBox.information(self, 'Сводка',
+            #                             'Время сбора подбор самовывоз: {}\n'
+            #                             'Время сбора подбор доставка: {}\n'
+            #                             'Время сбора маршрутов на доставку: {}\n'
+            #                             .format(time_dost_s, time_dost, time_dost_dost))
+            #
+            # except Exception as ex:
+            #     logger.error(ex)
 
     except Exception as ex:
         logger.error('Ошибка записи результата {}'.format(ex))
@@ -402,3 +402,62 @@ def set_column(df, worksheet, cell_format=None, num=0):
     worksheet.autofilter(num, 0, max_row, max_col - 1)
     worksheet.set_column('A:A', 24, cell_format)
     worksheet.set_column('B:K', 16, cell_format)
+
+
+def show_graf(df):
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w', '#FFA07A', '#BA55D3', '#00FFFF', '#FFD700', '#808080', '#800000',
+              '#008080', '#FFFF00', '#FF00FF', '#800080', '#00FF00']
+    df['Время создания'] = pd.to_datetime(df['Время создания'])
+    df['Время завершения'] = pd.to_datetime(df['Время завершения'])
+
+    type_doc = ['Отгрузка',
+                'Подбор', 'Внутрискладское перемещение',
+                'Приемка', 'Доставка', 'Локальное перемещение', 'Самовывоз', 'Инвентаризация'
+                ]
+    df = df[df['Тип документа'].isin(type_doc)]
+    operation_types = df['Тип документа'].unique()
+
+    # Define the working hours as a list of tuples
+    working_hours = [('05:00', '17:00')]
+
+    # Создание списка времени с шагом 1 минута в рамках рабочего времени
+    time_list = pd.date_range(start=df['Время создания'].min().strftime('%Y-%m-%d 09:00'),
+                              end=df['Время завершения'].max().strftime('%Y-%m-%d 21:00'),
+                              freq='1T')
+
+    # Создание объекта оси
+    fig, axes = plt.subplots(nrows=len(operation_types), ncols=1, sharex=True, figsize=(16, 16))
+    for i, operation_type in enumerate(operation_types):
+        # Создаем фрейм с данными для текущего типа операции
+        temp_df = df[df['Тип документа'] == operation_type]
+        operation_list = []
+        for _, row in temp_df.iterrows():
+            operation_list.append((row['Время создания'], row['Время завершения']))
+
+        active_list = []
+        for t in time_list:
+            active = 0
+            for start, end in operation_list:
+                if start <= t <= end:
+                    active = 1
+                    break
+            active_list.append(active)
+
+        time_array = np.array(time_list)
+        active_array = np.array(active_list)
+        idx = np.where(active_array == 1)[0]
+        axes[i].plot_date(time_array[idx], active_array[idx], linestyle='', marker='o', color=colors[i % len(colors)],
+                          label=operation_type)
+
+        axes[i].set_ylabel(operation_type)
+
+    # Общие параметры для всех subplots
+    plt.xlabel('Время')
+    fig.tight_layout()
+    plt.show()
+
+
